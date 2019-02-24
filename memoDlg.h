@@ -42,4 +42,6 @@ public:
 	Saver sv;
 
 	CListCtrl m_list_picker;
+	afx_msg void OnHdnItemclickListPicker(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult);
 };

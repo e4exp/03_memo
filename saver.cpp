@@ -32,6 +32,7 @@ Saver::Saver(){
 		CString query =
 			"CREATE TABLE notes("
 			"id	INTEGER PRIMARY KEY AUTOINCREMENT,"
+			"title TEXT,"
 			"note TEXT,"
 			"created TIMESTAMP DEFAULT (DATETIME('now','localtime')),"
 			"updated TIMESTAMP DEFAULT (DATETIME('now','localtime')) "
@@ -48,33 +49,17 @@ Saver::Saver(){
 
 
 
-	//load
-	//picker = new CString*[COLUMN_NUM];
-	
-
-
-
 	
 }
 
 
 Saver::~Saver() {
 
-	/*
-	for (int i = 0; i<notes_cnt; i++) {
-		delete[] picker[i];
-		//picker[i] = 0;
-	}
-
-	delete[] picker;
-	//picker = 0;
-	*/
-	
 }
 
 
 
-void Saver::store_note(CString str) {
+void Saver::store_note(CString title, CString body) {
 	
 
 	//TRACE("open=%d", ret);
@@ -82,7 +67,7 @@ void Saver::store_note(CString str) {
 
 		// store
 		CString query;
-		query.Format("INSERT INTO notes(note) values('%s');", (LPCTSTR)str);
+		query.Format("INSERT INTO notes(note,title) values('%s','%s');", (LPCTSTR)body, (LPCTSTR)title);
 		sqlite3_exec(db, query, NULL, NULL, &err);
 
 		sqlite3_close(db);
@@ -115,22 +100,17 @@ int Saver::load_notes() {
 		sqlite3_get_table(db, query.GetBuffer(), &result, &row, &col, &err);
 		query.ReleaseBuffer();
 
-
+		
 		picker.resize(cnt);
 		int idx_r;
 		int idx_c;
 		for (int i = COLUMN_NUM; i < itr; i++) {
 			idx_r = (int)floor((i - COLUMN_NUM) / COLUMN_NUM);
 			idx_c = (i - COLUMN_NUM) % COLUMN_NUM;
+
 			picker[idx_r].resize(COLUMN_NUM);
 			picker[idx_r][idx_c] = result[i];
-
-			/*
-			picker[idx_r] = new CString[COLUMN_NUM];
-			picker[idx_r][idx_c] = result[i];
-			*/
-
-
+			
 			/*
 			if (i == c)g_largest_list_idx = _ttoi(result[i]);
 			else if (i == itr - c)g_smallest_list_idx = _ttoi(result[i]);

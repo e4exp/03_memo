@@ -21,7 +21,7 @@ public:
 	Saver();
 	~Saver();
 
-	void store_note(CString str);
+	void store_note(CString, CString);
 	int load_notes();
 	
 
@@ -43,7 +43,7 @@ public:
 	
 	char* db_name;
 
-	static const int COLUMN_NUM = 4; //all columns
+	static const int COLUMN_NUM = 5; //all columns
 	int notes_cnt;
 	//CString **picker; // [][COLUMN_NUM];
 	std::vector<std::vector<CString>> picker;
@@ -53,4 +53,4 @@ public:
 };
 
 
-#endif // INCLUDE_GUARD_HOGE_HPP
+#endif // INCLUDE_GUARD_SAVER_H

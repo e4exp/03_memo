@@ -71,6 +71,7 @@ BEGIN_MESSAGE_MAP(CmemoDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(button_add, &CmemoDlg::OnBnClickedadd)
+	ON_NOTIFY(NM_CLICK, IDC_LIST_PICKER, &CmemoDlg::OnNMClickListPicker)
 END_MESSAGE_MAP()
 
 
@@ -176,16 +177,29 @@ void CmemoDlg::OnBnClickedadd()
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 
 	//get text
-	CString str;
-	((CEdit*)GetDlgItem(IDC_EDIT1))->GetWindowTextA(str);
+	CString str_title, str_body;
+	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
+	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
 
 	//store in db
-	sv.store_note(str);
+	sv.store_note(str_title, str_body);
 
 	//delete text
-	((CEdit*)GetDlgItem(IDC_EDIT1))->SetWindowTextA("");
+	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->SetWindowTextA("");
+	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->SetWindowTextA("");
 
 	//load titles from db to listview
+
+	/*
+	for (int i = 0; i < sv.notes_cnt; i++) {
+		sv.picker[i].clear();
+
+	}
+	sv.picker.clear();
+	*/
+
+	m_list_picker.DeleteAllItems();
+
 	int notes_num=sv.load_notes();
 	insert_picker_item(notes_num);
 
@@ -210,10 +224,10 @@ int  CmemoDlg::init_picker()
 		lvc.pszText = caption[i];   // 見出しテキスト
 		lvc.cx = 20;          // 横幅
 		if (i == 1) {
-			lvc.cx = 30;
+			lvc.cx =60;
 		}
 		if (i == 2) {
-			lvc.cx = 40;
+			lvc.cx = 80;
 		}
 		
 		if (m_list_picker.InsertColumn(i, &lvc) == -1) { err = 1; break; }
@@ -226,14 +240,13 @@ int  CmemoDlg::init_picker()
 
 // リストアイテム挿入
 int CmemoDlg::insert_picker_item(int cnt) {
-	const int col = 2;
+	
+	const int col = 3;
 	const int    itemNum = cnt * col;
 	LVITEM       lvi;
 	CString      str;
 	int          i, index = 0;
 	int          err = 0;
-
-
 
 	for (i = 0; i < itemNum; i++)
 	{
@@ -241,7 +254,6 @@ int CmemoDlg::insert_picker_item(int cnt) {
 		int idx_r = (int)floor(i / col);
 		int idx_c = (i % col);
 		int idx_c_real = idx_c;
-		//if (idx_c >= 3)idx_c_real++;
 				
 		lvi.mask = LVIF_TEXT;
 		// ID
@@ -250,7 +262,7 @@ int CmemoDlg::insert_picker_item(int cnt) {
 			lvi.iItem = idx_r;
 			lvi.iSubItem = idx_c;
 
-			//lvi.pszText = const_cast<LPTSTR>(static_cast<LPCTSTR>(sv.picker[idx_r][idx_c_real]));
+			
 			lvi.pszText = const_cast<LPTSTR>(static_cast<LPCTSTR>(sv.picker[idx_r][idx_c_real]));
 			if (idx_c == 0) {
 				if ((index = m_list_picker.InsertItem(&lvi)) == -1) err = 1;
@@ -270,4 +282,30 @@ int CmemoDlg::insert_picker_item(int cnt) {
 	}
 
 	return err;
+}
+
+
+
+void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pNMItemActivate = reinterpret_cast<LPNMITEMACTIVATE>(pNMHDR);
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	*pResult = 0;
+
+
+	//get selected idx
+	int idx = -1;
+	int list_idx;
+	while ((idx = m_list_picker.GetNextItem(idx, LVNI_ALL | LVNI_SELECTED)) != -1) {
+		list_idx = idx;
+	}
+
+	//set texts
+	CString str_title, str_body;
+	str_title = sv.picker[list_idx][1];
+	str_body = sv.picker[list_idx][2];
+	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->SetWindowTextA(str_title);
+	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->SetWindowTextA(str_body);
+
+	
 }
