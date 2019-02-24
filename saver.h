@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "./sqlite3.h"
+#include<vector>
 
 // sqlite3.dll内関数ポインタ型定義
 typedef int(__cdecl * pOpen)(char *, sqlite3 **);
@@ -43,7 +44,9 @@ public:
 	char* db_name;
 
 	static const int COLUMN_NUM = 4; //all columns
-	CString **picker; // [][COLUMN_NUM];
+	int notes_cnt;
+	//CString **picker; // [][COLUMN_NUM];
+	std::vector<std::vector<CString>> picker;
 
 
 

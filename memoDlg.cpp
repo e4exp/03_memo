@@ -108,7 +108,9 @@ BOOL CmemoDlg::OnInitDialog()
 	// TODO: 初期化をここに追加します。
 
 	init_picker();
-
+	//load titles from db to listview
+	int notes_num = sv.load_notes();
+	insert_picker_item(notes_num);
 
 
 
@@ -196,7 +198,7 @@ int  CmemoDlg::init_picker()
 
 	LVCOLUMN    lvc;
 	int         i;
-	TCHAR       caption[][32] = { _T("ID"), _T("title") };
+	TCHAR       caption[][32] = { _T("ID"), _T("title"),_T("body") };
 	const int   clmNum = sizeof caption / sizeof caption[0];
 	int         err = 0;
 	m_list_picker.SetExtendedStyle(LVS_EX_FULLROWSELECT);
@@ -206,14 +208,14 @@ int  CmemoDlg::init_picker()
 	{
 		lvc.iSubItem = i;            // サブアイテム番号
 		lvc.pszText = caption[i];   // 見出しテキスト
-		lvc.cx = 40;          // 横幅
+		lvc.cx = 20;          // 横幅
 		if (i == 1) {
-			lvc.cx = 80;
+			lvc.cx = 30;
 		}
-		else if (i == 2) {
-			lvc.cx = 115;
-
+		if (i == 2) {
+			lvc.cx = 40;
 		}
+		
 		if (m_list_picker.InsertColumn(i, &lvc) == -1) { err = 1; break; }
 
 	}
@@ -240,9 +242,7 @@ int CmemoDlg::insert_picker_item(int cnt) {
 		int idx_c = (i % col);
 		int idx_c_real = idx_c;
 		//if (idx_c >= 3)idx_c_real++;
-
-
-
+				
 		lvi.mask = LVIF_TEXT;
 		// ID
 		if (!err)
@@ -250,6 +250,7 @@ int CmemoDlg::insert_picker_item(int cnt) {
 			lvi.iItem = idx_r;
 			lvi.iSubItem = idx_c;
 
+			//lvi.pszText = const_cast<LPTSTR>(static_cast<LPCTSTR>(sv.picker[idx_r][idx_c_real]));
 			lvi.pszText = const_cast<LPTSTR>(static_cast<LPCTSTR>(sv.picker[idx_r][idx_c_real]));
 			if (idx_c == 0) {
 				if ((index = m_list_picker.InsertItem(&lvi)) == -1) err = 1;

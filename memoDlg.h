@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include "saver.h";
+#include "saver.h"
 #include "afxcmn.h"
 
 // CmemoDlg ダイアログ
