@@ -38,10 +38,19 @@ Saver::Saver(){
 			"updated TIMESTAMP DEFAULT (DATETIME('now','localtime')),"
 			"deleted INTEGER NOT NULL DEFAULT 0 "
 			");";
-
-
 		sqlite3_exec(db, query, NULL, NULL, &err);
 		query.ReleaseBuffer();
+
+		/*
+		//trigger
+		query =
+			"CREATE TRIGGER UpdateLastTime UPDATE OF title, note, deleted ON notes "
+			"BEGIN "
+			"UPDATE notes SET updated = (DATETIME('now','localtime')) WHERE deleted = 0; "
+			"END;";
+		sqlite3_exec(db, query, NULL, NULL, &err);
+		query.ReleaseBuffer();
+		*/
 		
 		// データベースファイルを閉じる
 		sqlite3_close(db);
@@ -112,7 +121,7 @@ void Saver::update_title(CString title, int id) {
 
 
 		CString query;
-		query.Format("UPDATE notes SET title = '%s' WHERE id=%d ;",(LPCTSTR)title, id); //'%s'  quotation needed for this statement.
+		query.Format("UPDATE notes SET title = '%s', updated=(DATETIME('now','localtime')) WHERE id=%d ;",(LPCTSTR)title, id); //'%s'  quotation needed for this statement.
 		int ret = sqlite3_exec(db, query, NULL, NULL, &err);
 		if (ret != SQLITE_OK) {
 			CString est;
@@ -132,7 +141,7 @@ void Saver::update_body(CString body, int id) {
 	if (!sqlite3_open(db_name, &db)) {
 
 		CString query;
-		query.Format("UPDATE notes SET note = '%s' WHERE id=%d ;", (LPCTSTR)body, id); //'%s'  quotation needed for this statement.
+		query.Format("UPDATE notes SET note = '%s', updated=(DATETIME('now','localtime')) WHERE id=%d ;", (LPCTSTR)body, id); //'%s'  quotation needed for this statement.
 		int ret = sqlite3_exec(db, query, NULL, NULL, &err);
 		if (ret != SQLITE_OK) {
 			CString est;
@@ -150,7 +159,7 @@ void Saver::delete_note(int id) {
 	if (!sqlite3_open(db_name, &db)) {
 
 		CString query;
-		query.Format("UPDATE notes SET deleted = 1 WHERE id=%d ;", id);
+		query.Format("UPDATE notes SET deleted = 1,updated=(DATETIME('now','localtime')) WHERE id=%d ;", id);
 		int ret = sqlite3_exec(db, query, NULL, NULL, &err);
 		if (ret != SQLITE_OK) {
 			CString est;

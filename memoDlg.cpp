@@ -64,6 +64,8 @@ void CmemoDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_LIST_PICKER, m_list_picker);
+	DDX_Control(pDX, IDC_STATIC_CREATED, m_static_created);
+	DDX_Control(pDX, IDC_STATIC_UPDATED, m_static_updated);
 }
 
 BEGIN_MESSAGE_MAP(CmemoDlg, CDialogEx)
@@ -119,7 +121,7 @@ BOOL CmemoDlg::OnInitDialog()
 	//load titles from db to listview
 	int notes_num = sv.load_notes();
 	insert_picker_item(notes_num);
-
+	init_date();
 	
 
 
@@ -302,6 +304,11 @@ int CmemoDlg::get_selected_idx() {
 
 }
 
+void CmemoDlg::init_date() {
+	m_static_created.SetWindowTextA("created: ");
+	m_static_updated.SetWindowTextA("updated: ");
+}
+
 
 void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -331,6 +338,10 @@ void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 	//hold index
 	sv.picker.selected_idx = _ttoi(sv.picker.holder[list_idx][0]);
 
+	CString create="created: "+sv.picker.holder[list_idx][3];
+	CString update = "updated: " + sv.picker.holder[list_idx][4];
+	m_static_created.SetWindowTextA(create);
+	m_static_updated.SetWindowTextA(update);
 
 }
 

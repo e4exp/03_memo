@@ -5,6 +5,7 @@
 #pragma once
 #include "saver.h"
 #include "afxcmn.h"
+#include "afxwin.h"
 
 // CmemoDlg ダイアログ
 class CmemoDlg : public CDialogEx
@@ -36,6 +37,7 @@ protected:
 public:
 	afx_msg void OnBnClickedAdd();
 	int init_picker();
+	void init_date();
 	int insert_picker_item(int);
 	void load_picker();
 	void update_note();
@@ -59,4 +61,6 @@ public:
 	afx_msg void OnEnKillfocusEditTitle();
 	afx_msg void OnEnKillfocusEditBody();
 	afx_msg void OnBnClickedButtonDelete();
+	CStatic m_static_created;
+	CStatic m_static_updated;
 };
