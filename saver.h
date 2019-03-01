@@ -42,6 +42,7 @@ public:
 	void update_title(CString, int);
 	void update_body(CString, int);
 	int load_notes();
+	void delete_note(int);
 	
 
 public:
@@ -62,7 +63,7 @@ public:
 	
 	char* db_name;
 
-	static const int COLUMN_NUM = 5; //all columns
+	static const int COLUMN_NUM = 6; //all columns
 	int notes_cnt;
 	//CString **picker; // [][COLUMN_NUM];
 	//std::vector<std::vector<CString>> picker; //buffer for storing all notes

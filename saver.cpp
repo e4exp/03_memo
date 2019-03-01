@@ -35,7 +35,8 @@ Saver::Saver(){
 			"title TEXT,"
 			"note TEXT,"
 			"created TIMESTAMP DEFAULT (DATETIME('now','localtime')),"
-			"updated TIMESTAMP DEFAULT (DATETIME('now','localtime')) "
+			"updated TIMESTAMP DEFAULT (DATETIME('now','localtime')),"
+			"deleted INTEGER NOT NULL DEFAULT 0 "
 			");";
 
 
@@ -144,6 +145,23 @@ void Saver::update_body(CString body, int id) {
 }
 
 
+void Saver::delete_note(int id) {
+	
+	if (!sqlite3_open(db_name, &db)) {
+
+		CString query;
+		query.Format("UPDATE notes SET deleted = 1 WHERE id=%d ;", id);
+		int ret = sqlite3_exec(db, query, NULL, NULL, &err);
+		if (ret != SQLITE_OK) {
+			CString est;
+			est.Format("delete: %s", err);
+			AfxMessageBox(est);
+		}
+		query.ReleaseBuffer();
+		sqlite3_close(db);
+	}
+}
+
 
 
 
@@ -152,20 +170,21 @@ int Saver::load_notes() {
 
 		
 	//TRACE("open=%d", ret);
-	int cnt;
+	int cnt=0;
 	if (!sqlite3_open(db_name, &db)) {
 
 
 		//get count
 		CString query;
-		query.Format("SELECT COUNT(*) FROM notes ;");
+		query.Format("SELECT COUNT(*) FROM notes WHERE deleted=0;");
 		sqlite3_get_table(db, query.GetBuffer(), &result, &row, &col, &err);
 		query.ReleaseBuffer();
 		cnt = _ttoi(result[1]);
 		const int itr = (cnt + 1) * COLUMN_NUM;
 
 		//get notes
-		query.Format("SELECT * FROM notes ORDER BY id DESC;");
+		//query.Format("SELECT * FROM notes ORDER BY id DESC;");
+		query.Format("SELECT id, title, note, created, updated, deleted FROM notes WHERE deleted=0 ORDER BY id DESC;");
 		int ret=sqlite3_get_table(db, query.GetBuffer(), &result, &row, &col, &err);
 		query.ReleaseBuffer();
 		if (ret != SQLITE_OK) {

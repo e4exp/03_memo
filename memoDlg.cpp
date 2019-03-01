@@ -70,16 +70,15 @@ BEGIN_MESSAGE_MAP(CmemoDlg, CDialogEx)
 	ON_WM_SYSCOMMAND()
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
-	ON_BN_CLICKED(button_add, &CmemoDlg::OnBnClickedadd)
+	ON_BN_CLICKED(IDC_BUTTON_ADD, &CmemoDlg::OnBnClickedAdd)
 	ON_NOTIFY(NM_CLICK, IDC_LIST_PICKER, &CmemoDlg::OnNMClickListPicker)
 	ON_EN_CHANGE(IDC_EDIT_BODY, &CmemoDlg::OnEnChangeEditBody)
 	ON_EN_CHANGE(IDC_EDIT_TITLE, &CmemoDlg::OnEnChangeEditTitle)
-//	ON_EN_UPDATE(IDC_EDIT_BODY, &CmemoDlg::OnEnUpdateEditBody)
-//	ON_EN_UPDATE(IDC_EDIT_TITLE, &CmemoDlg::OnEnUpdateEditTitle)
-ON_EN_SETFOCUS(IDC_EDIT_TITLE, &CmemoDlg::OnEnSetfocusEditTitle)
-ON_EN_SETFOCUS(IDC_EDIT_BODY, &CmemoDlg::OnEnSetfocusEditBody)
-ON_EN_KILLFOCUS(IDC_EDIT_TITLE, &CmemoDlg::OnEnKillfocusEditTitle)
-ON_EN_KILLFOCUS(IDC_EDIT_BODY, &CmemoDlg::OnEnKillfocusEditBody)
+	ON_EN_SETFOCUS(IDC_EDIT_TITLE, &CmemoDlg::OnEnSetfocusEditTitle)
+	ON_EN_SETFOCUS(IDC_EDIT_BODY, &CmemoDlg::OnEnSetfocusEditBody)
+	ON_EN_KILLFOCUS(IDC_EDIT_TITLE, &CmemoDlg::OnEnKillfocusEditTitle)
+	ON_EN_KILLFOCUS(IDC_EDIT_BODY, &CmemoDlg::OnEnKillfocusEditBody)
+	ON_BN_CLICKED(IDC_BUTTON_DELETE, &CmemoDlg::OnBnClickedButtonDelete)
 END_MESSAGE_MAP()
 
 
@@ -121,10 +120,7 @@ BOOL CmemoDlg::OnInitDialog()
 	int notes_num = sv.load_notes();
 	insert_picker_item(notes_num);
 
-
-
-
-
+	
 
 
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
@@ -180,32 +176,26 @@ HCURSOR CmemoDlg::OnQueryDragIcon()
 }
 
 
-void CmemoDlg::OnBnClickedadd()
+void CmemoDlg::OnBnClickedAdd()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 
 	//get text
 	CString str_title, str_body;
-	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
-	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
-
-	//store in db
-	sv.store_note(str_title, str_body);
 
 	//delete text
 	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->SetWindowTextA("");
 	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->SetWindowTextA("");
 
-	//load titles from db to listview
-
 	/*
-	for (int i = 0; i < sv.notes_cnt; i++) {
-		sv.picker[i].clear();
-
-	}
-	sv.picker.clear();
+	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
+	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
 	*/
 
+	//store in db
+	sv.store_note(str_title, str_body);
+
+	
 	load_picker();
 
 }
@@ -265,7 +255,8 @@ int CmemoDlg::insert_picker_item(int cnt) {
 
 		int idx_r = (int)floor(i / col);
 		int idx_c = (i % col);
-		
+
+		if (idx_c == col)continue;
 				
 		lvi.mask = LVIF_TEXT;
 		// ID
@@ -318,6 +309,7 @@ void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 	*pResult = 0;
 
+	if (sv.picker.whole_cnt == 0)return;
 
 	//get selected idx
 	int list_idx=get_selected_idx();
@@ -337,7 +329,7 @@ void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 	//hold index
-	sv.picker.selected_idx = list_idx;
+	sv.picker.selected_idx = _ttoi(sv.picker.holder[list_idx][0]);
 
 
 }
@@ -352,7 +344,7 @@ void CmemoDlg::update_note() {
 	CString str_title;
 	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
 	//get selected idx
-	int idx = sv.picker.whole_cnt - sv.picker.selected_idx;
+	int idx= sv.picker.selected_idx;
 	sv.update_title(str_title, idx);
 	sv.update_body(str_body, idx);
 	load_picker();
@@ -368,7 +360,7 @@ void CmemoDlg::update_body() {
 	//get text
 	CString str_body;
 	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
-	int idx = sv.picker.whole_cnt - sv.picker.selected_idx;
+	int idx = sv.picker.selected_idx;
 
 	sv.update_body(str_body, idx);	
 	load_picker();
@@ -384,7 +376,7 @@ void CmemoDlg::update_title() {
 	CString str_title;
 	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
 	//get selected idx
-	int idx = sv.picker.whole_cnt -sv.picker.selected_idx;
+	int idx = sv.picker.selected_idx;
 		
 	sv.update_title(str_title, idx);
 	load_picker();
@@ -392,6 +384,16 @@ void CmemoDlg::update_title() {
 
 }
 
+
+void CmemoDlg::delete_note() {
+	
+	if (sv.picker.whole_cnt == 0)return;
+
+	int idx = sv.picker.selected_idx;
+	sv.delete_note (idx);
+	load_picker();
+
+}
 
 void CmemoDlg::OnEnChangeEditBody()
 {
@@ -404,7 +406,7 @@ void CmemoDlg::OnEnChangeEditBody()
 
 	
 	update_body();
-	//update_note();
+
 
 }
 
@@ -419,11 +421,12 @@ void CmemoDlg::OnEnChangeEditTitle()
 	// TODO: ここにコントロール通知ハンドラー コードを追加してください。
 
 	update_title();
-	//update_note();
+
 
 }
 
 
+//save flag title
 void CmemoDlg::OnEnSetfocusEditTitle()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
@@ -431,23 +434,32 @@ void CmemoDlg::OnEnSetfocusEditTitle()
 
 }
 
-
+//save flag body
 void CmemoDlg::OnEnSetfocusEditBody()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 	sv.save_body = true;
 }
 
-
+//save flag title
 void CmemoDlg::OnEnKillfocusEditTitle()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 	sv.save_title = false;
 }
 
-
+//save flag body
 void CmemoDlg::OnEnKillfocusEditBody()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 	sv.save_body = false;
+}
+
+//delete button
+void CmemoDlg::OnBnClickedButtonDelete()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	delete_note();
+
+
 }

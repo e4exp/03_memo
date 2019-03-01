@@ -34,13 +34,14 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 public:
-	afx_msg void OnBnClickedadd();
+	afx_msg void OnBnClickedAdd();
 	int init_picker();
 	int insert_picker_item(int);
 	void load_picker();
 	void update_note();
 	void update_body();
 	void update_title();
+	void delete_note();
 	int get_selected_idx();
 
 
@@ -57,4 +58,5 @@ public:
 	afx_msg void OnEnSetfocusEditBody();
 	afx_msg void OnEnKillfocusEditTitle();
 	afx_msg void OnEnKillfocusEditBody();
+	afx_msg void OnBnClickedButtonDelete();
 };
