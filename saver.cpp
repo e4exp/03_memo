@@ -40,7 +40,7 @@ Saver::Saver(){
 
 
 		sqlite3_exec(db, query, NULL, NULL, &err);
-
+		query.ReleaseBuffer();
 		
 		// データベースファイルを閉じる
 		sqlite3_close(db);
@@ -69,7 +69,7 @@ void Saver::store_note(CString title, CString body) {
 		CString query;
 		query.Format("INSERT INTO notes(note,title) values('%s','%s');", (LPCTSTR)body, (LPCTSTR)title);
 		sqlite3_exec(db, query, NULL, NULL, &err);
-
+		query.ReleaseBuffer();
 		sqlite3_close(db);
 
 	}
@@ -77,6 +77,75 @@ void Saver::store_note(CString title, CString body) {
 
 
 }
+
+
+void Saver::update_note(CString title, CString body, int id) {
+
+		
+	if (!sqlite3_open(db_name, &db)) {
+		
+
+		CString query;
+		query.Format("UPDATE notes SET note = '%s', title = '%s' WHERE id=%d ;", (LPCTSTR)body, (LPCTSTR)title, id); //'%s'  quotation needed for this statement.
+		int ret=sqlite3_exec(db, query, NULL, NULL, &err);
+		if (ret != SQLITE_OK) {
+			CString est;
+			est.Format("update: %s", err);
+			AfxMessageBox(est);
+		}
+		query.ReleaseBuffer();
+
+
+		sqlite3_close(db);
+
+	}
+
+
+
+}
+
+void Saver::update_title(CString title, int id) {
+
+
+	if (!sqlite3_open(db_name, &db)) {
+
+
+		CString query;
+		query.Format("UPDATE notes SET title = '%s' WHERE id=%d ;",(LPCTSTR)title, id); //'%s'  quotation needed for this statement.
+		int ret = sqlite3_exec(db, query, NULL, NULL, &err);
+		if (ret != SQLITE_OK) {
+			CString est;
+			est.Format("update: %s", err);
+			AfxMessageBox(est);
+		}
+		query.ReleaseBuffer();
+		sqlite3_close(db);
+	}
+}
+
+
+
+void Saver::update_body(CString body, int id) {
+
+
+	if (!sqlite3_open(db_name, &db)) {
+
+		CString query;
+		query.Format("UPDATE notes SET note = '%s' WHERE id=%d ;", (LPCTSTR)body, id); //'%s'  quotation needed for this statement.
+		int ret = sqlite3_exec(db, query, NULL, NULL, &err);
+		if (ret != SQLITE_OK) {
+			CString est;
+			est.Format("update: %s", err);
+			AfxMessageBox(est);
+		}
+		query.ReleaseBuffer();
+		sqlite3_close(db);
+	}
+}
+
+
+
+
 
 
 int Saver::load_notes() {
@@ -96,20 +165,28 @@ int Saver::load_notes() {
 		const int itr = (cnt + 1) * COLUMN_NUM;
 
 		//get notes
-		query.Format("SELECT * FROM notes");
-		sqlite3_get_table(db, query.GetBuffer(), &result, &row, &col, &err);
+		query.Format("SELECT * FROM notes ORDER BY id DESC;");
+		int ret=sqlite3_get_table(db, query.GetBuffer(), &result, &row, &col, &err);
 		query.ReleaseBuffer();
+		if (ret != SQLITE_OK) {
+			CString est;
+			est.Format("select: %s", err);
+			AfxMessageBox(est);
+		}
 
-		
-		picker.resize(cnt);
+		//get whole count
+		picker.whole_cnt = cnt;
+
+		//insert holder notes, titles, ids
+		picker.holder.resize(cnt);
 		int idx_r;
 		int idx_c;
 		for (int i = COLUMN_NUM; i < itr; i++) {
 			idx_r = (int)floor((i - COLUMN_NUM) / COLUMN_NUM);
 			idx_c = (i - COLUMN_NUM) % COLUMN_NUM;
 
-			picker[idx_r].resize(COLUMN_NUM);
-			picker[idx_r][idx_c] = result[i];
+			picker.holder[idx_r].resize(COLUMN_NUM);
+			picker.holder[idx_r][idx_c] = result[i];
 			
 			/*
 			if (i == c)g_largest_list_idx = _ttoi(result[i]);

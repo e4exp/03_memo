@@ -37,11 +37,24 @@ public:
 	afx_msg void OnBnClickedadd();
 	int init_picker();
 	int insert_picker_item(int);
+	void load_picker();
+	void update_note();
+	void update_body();
+	void update_title();
+	int get_selected_idx();
 
 
 	Saver sv;
 
 	CListCtrl m_list_picker;
-	afx_msg void OnHdnItemclickListPicker(NMHDR *pNMHDR, LRESULT *pResult);
+	
 	afx_msg void OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnEnChangeEditBody();
+	afx_msg void OnEnChangeEditTitle();
+//	afx_msg void OnEnUpdateEditBody();
+//	afx_msg void OnEnUpdateEditTitle();
+	afx_msg void OnEnSetfocusEditTitle();
+	afx_msg void OnEnSetfocusEditBody();
+	afx_msg void OnEnKillfocusEditTitle();
+	afx_msg void OnEnKillfocusEditBody();
 };

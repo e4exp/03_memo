@@ -13,6 +13,22 @@ typedef int(__cdecl * pGetTable)(sqlite3 *, const char *, char ***, int *, int *
 typedef int(__cdecl * pFreeTable)(char **);
 typedef int(__cdecl * pClose)(sqlite3 *);
 
+
+class Picker {
+
+public:
+	std::vector<std::vector<CString>> holder;
+	int selected_idx = 0;
+	int whole_cnt = 0;
+	/*
+	CString old_title="" ;
+	CString old_body = "";
+	*/
+
+
+};
+
+
 class Saver {
 
 
@@ -22,6 +38,9 @@ public:
 	~Saver();
 
 	void store_note(CString, CString);
+	void update_note(CString, CString, int);
+	void update_title(CString, int);
+	void update_body(CString, int);
 	int load_notes();
 	
 
@@ -46,11 +65,13 @@ public:
 	static const int COLUMN_NUM = 5; //all columns
 	int notes_cnt;
 	//CString **picker; // [][COLUMN_NUM];
-	std::vector<std::vector<CString>> picker;
+	//std::vector<std::vector<CString>> picker; //buffer for storing all notes
+	Picker picker;
 
+	bool save_title=false;
+	bool save_body=false;
 
 
 };
-
 
 #endif // INCLUDE_GUARD_SAVER_H

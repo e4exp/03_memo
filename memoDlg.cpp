@@ -72,6 +72,14 @@ BEGIN_MESSAGE_MAP(CmemoDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(button_add, &CmemoDlg::OnBnClickedadd)
 	ON_NOTIFY(NM_CLICK, IDC_LIST_PICKER, &CmemoDlg::OnNMClickListPicker)
+	ON_EN_CHANGE(IDC_EDIT_BODY, &CmemoDlg::OnEnChangeEditBody)
+	ON_EN_CHANGE(IDC_EDIT_TITLE, &CmemoDlg::OnEnChangeEditTitle)
+//	ON_EN_UPDATE(IDC_EDIT_BODY, &CmemoDlg::OnEnUpdateEditBody)
+//	ON_EN_UPDATE(IDC_EDIT_TITLE, &CmemoDlg::OnEnUpdateEditTitle)
+ON_EN_SETFOCUS(IDC_EDIT_TITLE, &CmemoDlg::OnEnSetfocusEditTitle)
+ON_EN_SETFOCUS(IDC_EDIT_BODY, &CmemoDlg::OnEnSetfocusEditBody)
+ON_EN_KILLFOCUS(IDC_EDIT_TITLE, &CmemoDlg::OnEnKillfocusEditTitle)
+ON_EN_KILLFOCUS(IDC_EDIT_BODY, &CmemoDlg::OnEnKillfocusEditBody)
 END_MESSAGE_MAP()
 
 
@@ -198,13 +206,17 @@ void CmemoDlg::OnBnClickedadd()
 	sv.picker.clear();
 	*/
 
-	m_list_picker.DeleteAllItems();
-
-	int notes_num=sv.load_notes();
-	insert_picker_item(notes_num);
+	load_picker();
 
 }
 
+void CmemoDlg::load_picker() {
+	m_list_picker.DeleteAllItems();
+	int notes_num = sv.load_notes();
+	insert_picker_item(notes_num);
+
+
+}
 
 
 int  CmemoDlg::init_picker()
@@ -253,7 +265,7 @@ int CmemoDlg::insert_picker_item(int cnt) {
 
 		int idx_r = (int)floor(i / col);
 		int idx_c = (i % col);
-		int idx_c_real = idx_c;
+		
 				
 		lvi.mask = LVIF_TEXT;
 		// ID
@@ -263,9 +275,10 @@ int CmemoDlg::insert_picker_item(int cnt) {
 			lvi.iSubItem = idx_c;
 
 			
-			lvi.pszText = const_cast<LPTSTR>(static_cast<LPCTSTR>(sv.picker[idx_r][idx_c_real]));
+			lvi.pszText = const_cast<LPTSTR>(static_cast<LPCTSTR>(sv.picker.holder[idx_r][idx_c]));
 			if (idx_c == 0) {
 				if ((index = m_list_picker.InsertItem(&lvi)) == -1) err = 1;
+				
 			}
 			else
 			{
@@ -285,6 +298,19 @@ int CmemoDlg::insert_picker_item(int cnt) {
 }
 
 
+int CmemoDlg::get_selected_idx() {
+
+	int idx = -1;
+	int list_idx = 0;
+	while ((idx = m_list_picker.GetNextItem(idx, LVNI_ALL | LVNI_SELECTED)) != -1) {
+		list_idx = idx;
+
+	}
+
+	return list_idx;
+
+}
+
 
 void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -294,18 +320,134 @@ void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 	//get selected idx
-	int idx = -1;
-	int list_idx;
-	while ((idx = m_list_picker.GetNextItem(idx, LVNI_ALL | LVNI_SELECTED)) != -1) {
-		list_idx = idx;
-	}
-
+	int list_idx=get_selected_idx();
+	
 	//set texts
 	CString str_title, str_body;
-	str_title = sv.picker[list_idx][1];
-	str_body = sv.picker[list_idx][2];
+	str_title = sv.picker.holder[list_idx][1];
+	str_body = sv.picker.holder[list_idx][2];
 	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->SetWindowTextA(str_title);
 	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->SetWindowTextA(str_body);
 
+	/*
+	//hold
+	sv.picker.old_title = str_title;
+	sv.picker.old_body = str_body;
+	*/
+
+
+	//hold index
+	sv.picker.selected_idx = list_idx;
+
+
+}
+
+
+void CmemoDlg::update_note() {
+
+	//update current note
+	//get text
+	CString str_body;
+	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
+	CString str_title;
+	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
+	//get selected idx
+	int idx = sv.picker.whole_cnt - sv.picker.selected_idx;
+	sv.update_title(str_title, idx);
+	sv.update_body(str_body, idx);
+	load_picker();
+
+
+}
+
+
+void CmemoDlg::update_body() {
+	if (!sv.save_body)return;
+
 	
+	//get text
+	CString str_body;
+	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
+	int idx = sv.picker.whole_cnt - sv.picker.selected_idx;
+
+	sv.update_body(str_body, idx);	
+	load_picker();
+
+
+}
+
+
+void CmemoDlg::update_title() {
+	if (!sv.save_title)return;
+
+
+	CString str_title;
+	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
+	//get selected idx
+	int idx = sv.picker.whole_cnt -sv.picker.selected_idx;
+		
+	sv.update_title(str_title, idx);
+	load_picker();
+
+
+}
+
+
+void CmemoDlg::OnEnChangeEditBody()
+{
+	// TODO: これが RICHEDIT コントロールの場合、このコントロールが
+	// この通知を送信するには、CDialogEx::OnInitDialog() 関数をオーバーライドし、
+	// CRichEditCtrl().SetEventMask() を
+	// OR 状態の ENM_CHANGE フラグをマスクに入れて呼び出す必要があります。
+
+	// TODO: ここにコントロール通知ハンドラー コードを追加してください。
+
+	
+	update_body();
+	//update_note();
+
+}
+
+
+void CmemoDlg::OnEnChangeEditTitle()
+{
+	// TODO: これが RICHEDIT コントロールの場合、このコントロールが
+	// この通知を送信するには、CDialogEx::OnInitDialog() 関数をオーバーライドし、
+	// CRichEditCtrl().SetEventMask() を
+	// OR 状態の ENM_CHANGE フラグをマスクに入れて呼び出す必要があります。
+
+	// TODO: ここにコントロール通知ハンドラー コードを追加してください。
+
+	update_title();
+	//update_note();
+
+}
+
+
+void CmemoDlg::OnEnSetfocusEditTitle()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	sv.save_title = true;
+
+}
+
+
+void CmemoDlg::OnEnSetfocusEditBody()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	sv.save_body = true;
+}
+
+
+void CmemoDlg::OnEnKillfocusEditTitle()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	sv.save_title = false;
+}
+
+
+void CmemoDlg::OnEnKillfocusEditBody()
+{
+	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	sv.save_body = false;
 }
