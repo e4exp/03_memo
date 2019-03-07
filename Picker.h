@@ -11,7 +11,8 @@ public:
 
 public:
 	std::vector<std::vector<CString>> holder;
-	int selected_idx = 0;
+	//int selected_idx = 0;
+	CString selected_id = "";
 	int whole_cnt = 0;
 	/*
 	CString old_title="" ;

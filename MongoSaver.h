@@ -44,11 +44,11 @@ public:
 	~MongoSaver();
 
 	void insert_note(CString, CString);
-	void update_note(CString, CString, int);
-	void update_title(CString, int);
-	void update_body(CString, int);
+	void update_note(CString, CString, CString id);
+	void update_title(CString, CString id);
+	void update_body(CString, CString id);
 	int load_notes();
-	void delete_note(int);
+	void delete_note(CString id);
 
 
 public:
@@ -72,7 +72,7 @@ public:
 
 
 	enum fields {
-		id,
+		_id,
 		title,
 		note,
 		created,

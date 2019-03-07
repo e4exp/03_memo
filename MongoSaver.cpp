@@ -2,6 +2,9 @@
 #include "stdafx.h"
 
 #include "MongoSaver.h"
+#include "Utils.h"
+
+
 #include "picojson.h"
 #include <ctime>
 #include "time.h"
@@ -66,67 +69,62 @@ MongoSaver::~MongoSaver() {
 
 
 void MongoSaver::insert_note(CString title, CString body) {
-	AfxMessageBox("insert_notes");
 	long str_time = get_unix_time();
 
-	auto builder = bsoncxx::builder::stream::document{};
-	bsoncxx::document::value doc_value = builder
-		<< "id" << 0
-		<< "note" << body
-		<< "title" << title
-		<< "created" << str_time
-		<< "updated" << str_time
-		<< "deleted" << 0
-		<< bsoncxx::builder::stream::finalize;
-
-	bsoncxx::stdx::optional<mongocxx::result::insert_one> result =
-		coll.insert_one(doc_value.view());
-		
-
+	bsoncxx::builder::stream::document document{};
+	document << STR(id) << "0"
+		<< STR(note) << cstr_to_str(title)
+		<< STR(title) << cstr_to_str(body)
+		<< STR(created) << str_time
+		<< STR(updated) << str_time
+		<< STR(deleted) << "0";
+	coll.insert_one(document.view());
 }
 
 
-void MongoSaver::update_note(CString title, CString body, int id) {
+void MongoSaver::update_note(CString title, CString body, CString id) {
+	long str_time = get_unix_time();
 
-	coll.update_one(document{} << "_id" << id << finalize,
+	coll.update_one(document{} << "_id" << bsoncxx::oid(cstr_to_str(id)) << finalize,
 		document{} << "$set" << open_document <<
-		"title" << title <<
-		"note" << body <<
-		"updated" << 1 << close_document << finalize);
+		"title" << cstr_to_str(title) <<
+		"note" << cstr_to_str(body) <<
+		"updated" << str_time << close_document << finalize);
 
 }
 
-void MongoSaver::update_title(CString title, int id) {
+void MongoSaver::update_title(CString title,CString id) {
+	long str_time = get_unix_time();
 
-
-	coll.update_one(document{} << "_id" << id << finalize,
+	coll.update_one(document{} << "_id" << bsoncxx::oid(cstr_to_str(id)) << finalize,
 		document{} << "$set" << open_document <<
-		"title" << title <<
-		"updated" << 1 << close_document << finalize);
+		"title" << cstr_to_str(title) <<
+		"updated" << str_time << close_document << finalize);
 
 
 }
 
 
 
-void MongoSaver::update_body(CString body, int id) {
+void MongoSaver::update_body(CString body, CString id) {
+	long str_time = get_unix_time();
 
-	coll.update_one(document{} << "_id" << id << finalize,
+	coll.update_one(document{} << "_id" << bsoncxx::oid(cstr_to_str(id)) << finalize,
 		document{} << "$set" << open_document <<
-		"note" << body <<
-		"updated" << 1 << close_document << finalize);
+		"note" << cstr_to_str(body) <<
+		"updated" << str_time << close_document << finalize);
 
 
 }
 
 
-void MongoSaver::delete_note(int id) {
-	AfxMessageBox("delete_notes");
+void MongoSaver::delete_note(CString id) {
+	long str_time = get_unix_time();
 
-	coll.update_one(document{} << "_id" << id << finalize,
+	coll.update_one(document{} << "_id" << bsoncxx::oid(cstr_to_str(id)) << finalize,
 		document{} << "$set" << open_document <<
 		"deleted" << 1 << 
-		"updated" << 1 << close_document << finalize);
+		"updated" << str_time << close_document << finalize);
 		
 
 }
@@ -151,9 +149,7 @@ int MongoSaver::load_notes() {
 		cst.Format("%d", n_valid);
 		//AfxMessageBox(cst);
 		
-		
 		auto opts = mongocxx::options::find{};
-		//opts.sort(document{} << "_id" << -1 << finalize);
 		opts.sort(document{} << "updated" << -1 << finalize);
 		mongocxx::cursor cursor = coll.find(document{} << "deleted" << open_document <<
 			"$eq" << "0" << close_document << finalize, opts);
@@ -169,6 +165,8 @@ int MongoSaver::load_notes() {
 
 			//get json
 			auto str = bsoncxx::to_json(doc);
+			//cst = str.c_str();
+			//AfxMessageBox(cst);
 
 			//parse json into string
 			picojson::value v;
@@ -184,11 +182,19 @@ int MongoSaver::load_notes() {
 			picker.holder[idx_r].resize(COLUMN_NUM);
 			for (const auto& p : obj) { //iterate by col
 				CString field = p.first.c_str();
-				CString value = p.second.to_str().c_str();
-				//AfxMessageBox(field);
+				if (field == "id")continue;
+				else {
+					
+					CString value;
+					if (field == "_id") value = p.second.get("$oid").to_str().c_str();
+					else value = p.second.to_str().c_str();
 
-				if (p.first.c_str() == "_id")continue;
-				picker.store_field(idx_r, field, value);
+					//AfxMessageBox(field + ":" + value);
+
+
+					picker.store_field(idx_r, field, value);
+				}
+				
 			}
 
 			idx_r++;

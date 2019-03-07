@@ -20,7 +20,7 @@ CString utc_to_local(CString value) {
 void Picker::store_field( int row, CString field, CString value) {
 
 
-	if (field == STR(id)) {
+	if (field == STR(_id)) {
 		holder[row][0] = value;
 	}
 	else if (field == STR(title)) {

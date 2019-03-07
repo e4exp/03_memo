@@ -9,7 +9,7 @@
 
 #include "Saver.h"
 #include "MongoSaver.h"
-
+#include "Utils.h"
 
 
 #ifdef _DEBUG
@@ -185,6 +185,8 @@ void CmemoDlg::OnBnClickedAdd()
 
 	//get text
 	CString str_title, str_body;
+	str_title = "";
+	str_body = "";
 
 	//delete text
 	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->SetWindowTextA("");
@@ -337,7 +339,8 @@ void CmemoDlg::OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult)
 
 
 	//hold index
-	sv.picker.selected_idx = _ttoi(sv.picker.holder[list_idx][0]);
+	//sv.picker.selected_idx = _ttoi(sv.picker.holder[list_idx][0]);
+	sv.picker.selected_id = sv.picker.holder[list_idx][0];
 
 	CString create="created: "+sv.picker.holder[list_idx][3];
 	CString update = "updated: " + sv.picker.holder[list_idx][4];
@@ -356,7 +359,7 @@ void CmemoDlg::update_note() {
 	CString str_title;
 	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
 	//get selected idx
-	int idx= sv.picker.selected_idx;
+	CString idx= sv.picker.selected_id;
 	sv.update_title(str_title, idx);
 	sv.update_body(str_body, idx);
 	load_picker();
@@ -372,7 +375,7 @@ void CmemoDlg::update_body() {
 	//get text
 	CString str_body;
 	((CEdit*)GetDlgItem(IDC_EDIT_BODY))->GetWindowTextA(str_body);
-	int idx = sv.picker.selected_idx;
+	CString idx = sv.picker.selected_id;
 
 	sv.update_body(str_body, idx);	
 	load_picker();
@@ -388,7 +391,7 @@ void CmemoDlg::update_title() {
 	CString str_title;
 	((CEdit*)GetDlgItem(IDC_EDIT_TITLE))->GetWindowTextA(str_title);
 	//get selected idx
-	int idx = sv.picker.selected_idx;
+	CString idx = sv.picker.selected_id;
 		
 	sv.update_title(str_title, idx);
 	load_picker();
@@ -401,7 +404,7 @@ void CmemoDlg::delete_note() {
 	
 	if (sv.picker.whole_cnt == 0)return;
 
-	int idx = sv.picker.selected_idx;
+	CString idx = sv.picker.selected_id;
 	sv.delete_note (idx);
 	load_picker();
 
