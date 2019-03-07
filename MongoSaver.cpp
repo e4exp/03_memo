@@ -3,7 +3,8 @@
 
 #include "MongoSaver.h"
 #include "picojson.h"
-
+#include <ctime>
+#include "time.h"
 
 int exec(int argc, char *argv[]) {
 
@@ -28,25 +29,32 @@ int exec(int argc, char *argv[]) {
 }
 
 
+long get_unix_time() {
+
+	time_t now = std::time(nullptr);
+	return now;
+
+}
+
 
 MongoSaver::MongoSaver() {
-	AfxMessageBox("MongoSaver()");
 		
 	//will be created when first storing data
 	db = client[db_name];
 	coll = db[coll_name]; 
 	
-
 	/*
+	long str_time = get_unix_time();
 	bsoncxx::builder::stream::document document{};
-	document << "id" << "0" 
+	document << "id" << "3" 
 		<<"note" << "hello world"
 		<< "title" << "test"
-		<< "created" << "1"
-		<< "updated" << "1"
+		<< "created" << str_time
+		<< "updated" << str_time
 		<< "deleted" << "0"	;
 	coll.insert_one(document.view());
 	*/
+	
 
 }
 
@@ -59,14 +67,15 @@ MongoSaver::~MongoSaver() {
 
 void MongoSaver::insert_note(CString title, CString body) {
 	AfxMessageBox("insert_notes");
+	long str_time = get_unix_time();
 
 	auto builder = bsoncxx::builder::stream::document{};
 	bsoncxx::document::value doc_value = builder
 		<< "id" << 0
 		<< "note" << body
 		<< "title" << title
-		<< "created" << 1
-		<< "updated" << 1
+		<< "created" << str_time
+		<< "updated" << str_time
 		<< "deleted" << 0
 		<< bsoncxx::builder::stream::finalize;
 
@@ -124,6 +133,7 @@ void MongoSaver::delete_note(int id) {
 
 
 
+
 int MongoSaver::load_notes() {
 
 
@@ -139,11 +149,12 @@ int MongoSaver::load_notes() {
 
 		CString cst;
 		cst.Format("%d", n_valid);
-		AfxMessageBox(cst);
+		//AfxMessageBox(cst);
 		
 		
 		auto opts = mongocxx::options::find{};
-		opts.sort(document{} << "_id" << -1 << finalize);
+		//opts.sort(document{} << "_id" << -1 << finalize);
+		opts.sort(document{} << "updated" << -1 << finalize);
 		mongocxx::cursor cursor = coll.find(document{} << "deleted" << open_document <<
 			"$eq" << "0" << close_document << finalize, opts);
 
