@@ -62,7 +62,7 @@ void MongoSaver::insert_note(CString title, CString body) {
 
 	auto builder = bsoncxx::builder::stream::document{};
 	bsoncxx::document::value doc_value = builder
-		<< "_id" <<""
+		<< "id" << 0
 		<< "note" << body
 		<< "title" << title
 		<< "created" << 1
@@ -127,28 +127,31 @@ void MongoSaver::delete_note(int id) {
 int MongoSaver::load_notes() {
 
 
-	int n = coll.count_documents({});
-	if (n == 0)return n;
+	int n_all = coll.count_documents({});
+	int n_valid;
+
+	if (n_all == 0)return 0;
 	else {
 
+		// "0" is not int. needs string.
+		n_valid = coll.count_documents(document{} << "deleted" << open_document <<
+			"$eq" << "0" << close_document << finalize);
 
-		bsoncxx::builder::stream::document document{};
-		document << "deleted" << open_document <<
-			"$eq" << 0 << close_document << finalize;
-		int n = coll.count_documents(document.view());
+		CString cst;
+		cst.Format("%d", n_valid);
+		AfxMessageBox(cst);
 		
 		
-		//query.Format("SELECT id, title, note, created, updated, deleted FROM notes WHERE deleted=0 ORDER BY id DESC;");
-		auto order = bsoncxx::builder::stream::document{} << "_id" << -1 << finalize;
 		auto opts = mongocxx::options::find{};
-		opts.sort(order.view());
-		mongocxx::cursor cursor = coll.find(document.view(),opts);
+		opts.sort(document{} << "_id" << -1 << finalize);
+		mongocxx::cursor cursor = coll.find(document{} << "deleted" << open_document <<
+			"$eq" << "0" << close_document << finalize, opts);
 
 		//get whole count
-		picker.whole_cnt = n;
+		picker.whole_cnt = n_valid;
 
 		//insert holder notes, titles, ids
-		picker.holder.resize(n);
+		picker.holder.resize(n_valid);
 		int idx_r=0;
 		int i = COLUMN_NUM;
 		for (auto &&doc : cursor) {//iterate by row
@@ -160,25 +163,13 @@ int MongoSaver::load_notes() {
 			picojson::value v;
 			const std::string err = picojson::parse(v, str);
 			if (err.empty() == false) {
-				AfxMessageBox( err.c_str());
+				AfxMessageBox(err.c_str());
 				return 0;
 			}
 
 
 			//store cstring to vector
 			picojson::object& obj = v.get<picojson::object>();
-
-			/*
-			CString cstr;
-			cstr=obj["id"].get<std::string>().c_str();
-			cstr+=obj["note"].get <std::string>().c_str();
-			cstr += obj["title"].get<std::string>().c_str();
-			cstr += obj["created"].get<std::string>().c_str();
-			cstr += obj["updated"].get<std::string>().c_str();
-			cstr += obj["deleted"].get<std::string>().c_str();
-			//AfxMessageBox(cstr);
-			*/
-
 			picker.holder[idx_r].resize(COLUMN_NUM);
 			for (const auto& p : obj) { //iterate by col
 				CString field = p.first.c_str();
@@ -195,7 +186,8 @@ int MongoSaver::load_notes() {
 
 	}
 
-	return n;
+
+	return n_valid;
 
 }
 
