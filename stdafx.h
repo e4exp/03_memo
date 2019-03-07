@@ -2,7 +2,7 @@
 // stdafx.h : 標準のシステム インクルード ファイルのインクルード ファイル、または
 // 参照回数が多く、かつあまり変更されない、プロジェクト専用のインクルード ファイル
 // を記述します。
-
+//#define NOMINMAX
 #pragma once
 
 #ifndef VC_EXTRALEAN
@@ -32,11 +32,6 @@
 #endif // _AFX_NO_AFXCMN_SUPPORT
 
 #include <afxcontrolbars.h>     // MFC におけるリボンとコントロール バーのサポート
-
-
-
-
-
 
 
 

@@ -7,8 +7,8 @@
 #include "memoDlg.h"
 #include "afxdialogex.h"
 
-#include "./saver.h"
-
+#include "Saver.h"
+#include "MongoSaver.h"
 
 
 
@@ -125,6 +125,7 @@ BOOL CmemoDlg::OnInitDialog()
 	
 
 
+
 	return TRUE;  // フォーカスをコントロールに設定した場合を除き、TRUE を返します。
 }
 
@@ -195,7 +196,7 @@ void CmemoDlg::OnBnClickedAdd()
 	*/
 
 	//store in db
-	sv.store_note(str_title, str_body);
+	sv.insert_note(str_title, str_body);
 
 	
 	load_picker();

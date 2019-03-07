@@ -115,9 +115,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>C:\mongo-c-driver\include\libmongoc-1.0;C:\mongo-c-driver\include\libbson-1.0;C:\local\boost_1_69_0\include\boost-1_69;C:\mongo-cxx-driver\include\bsoncxx\v_noabi;C:\mongo-cxx-driver\include\mongocxx\v_noabi;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>C:\local\boost_1_69_0\lib;C:\mongo-c-driver\lib;C:\mongo-cxx-driver\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>bsoncxx.lib;mongocxx.lib;mongoc-1.0.lib;bson-1.0.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -188,8 +191,11 @@
   <ItemGroup>
     <ClInclude Include="memo.h" />
     <ClInclude Include="memoDlg.h" />
+    <ClInclude Include="MongoSaver.h" />
+    <ClInclude Include="Picker.h" />
+    <ClInclude Include="picojson.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="saver.h" />
+    <ClInclude Include="Saver.h" />
     <ClInclude Include="sqlite3.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -197,7 +203,9 @@
   <ItemGroup>
     <ClCompile Include="memo.cpp" />
     <ClCompile Include="memoDlg.cpp" />
-    <ClCompile Include="saver.cpp" />
+    <ClCompile Include="MongoSaver.cpp" />
+    <ClCompile Include="Picker.cpp" />
+    <ClCompile Include="Saver.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

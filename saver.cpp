@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
+
 #include <windows.h>
-#include "./saver.h"
+#include "Saver.h"
 
 Saver::Saver(){
 	//AfxMessageBox(_T("constructed"));
@@ -69,7 +70,7 @@ Saver::~Saver() {
 
 
 
-void Saver::store_note(CString title, CString body) {
+void Saver::insert_note(CString title, CString body) {
 	
 
 	//TRACE("open=%d", ret);

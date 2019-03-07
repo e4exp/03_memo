@@ -3,9 +3,12 @@
 //
 
 #pragma once
-#include "saver.h"
+
 #include "afxcmn.h"
 #include "afxwin.h"
+
+#include "Saver.h"
+#include "MongoSaver.h"
 
 // CmemoDlg ダイアログ
 class CmemoDlg : public CDialogEx
@@ -47,7 +50,8 @@ public:
 	int get_selected_idx();
 
 
-	Saver sv;
+	//Saver sv;
+	MongoSaver sv;
 
 	CListCtrl m_list_picker;
 	

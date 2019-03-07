@@ -3,3 +3,6 @@ Release
 res
 x64
 *.zip
+picojson/
+evernote-sdk-cpp/
+mongodb/
