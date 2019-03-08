@@ -55,9 +55,16 @@ public:
 
 	char* db_name = "memo";
 	char* coll_name = "notes";
+	char* conn_file_name = "connection.txt";
 
-	mongocxx::instance instance{};
-	mongocxx::client client{ mongocxx::uri{} };
+	//ssl
+	mongocxx::options::client client_options;
+	mongocxx::options::ssl ssl_options;
+
+
+	//connection
+	mongocxx::instance instance{};	
+	mongocxx::client client ;
 	mongocxx::database db;
 	mongocxx::collection coll;
 

@@ -6,8 +6,10 @@
 
 
 #include "picojson.h"
-#include <ctime>
-#include "time.h"
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 
 int exec(int argc, char *argv[]) {
 
@@ -32,16 +34,34 @@ int exec(int argc, char *argv[]) {
 }
 
 
-long get_unix_time() {
-
-	time_t now = std::time(nullptr);
-	return now;
-
-}
-
 
 MongoSaver::MongoSaver() {
-		
+
+	//set ssl
+	// If the server certificate is not signed by a well-known CA,
+	// you can set a custom CA file with the `ca_file` option.
+	// ssl_options.ca_file("/path/to/custom/cert.pem");
+
+	// If you want to disable certificate verification, you
+	// can set the `allow_invalid_certificates` option.
+	// ssl_options.allow_invalid_certificates(true);
+
+	//get connection string from file
+	std::ifstream fin(conn_file_name);
+	if (!fin) {
+		AfxMessageBox("connection file cant be read");
+		return;
+	}
+	std::stringstream strstream;
+	strstream << fin.rdbuf();
+	fin.close();
+
+	//content -> string
+	std::string conn_str(strstream.str());
+
+	client_options.ssl_opts(ssl_options);
+	client = mongocxx::client { mongocxx::uri{conn_str} };
+
 	//will be created when first storing data
 	db = client[db_name];
 	coll = db[coll_name]; 
@@ -57,7 +77,8 @@ MongoSaver::MongoSaver() {
 		<< "deleted" << "0"	;
 	coll.insert_one(document.view());
 	*/
-	
+
+
 
 }
 

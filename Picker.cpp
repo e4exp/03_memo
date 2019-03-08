@@ -1,21 +1,7 @@
 #include "stdafx.h"
 #include "Picker.h"
 #include "MongoSaver.h"
-#include <ctime>
-#include "time.h"
-
-
-CString utc_to_local(CString value) {
-
-	const time_t utc = _ttol(value);
-	struct tm now;
-
-	localtime_s(&now, &utc);
-	char result[32];
-	asctime_s(result, sizeof(result), &now);
-	std::string str(result);
-	return str.c_str();
-}
+#include "Utils.h"
 
 void Picker::store_field( int row, CString field, CString value) {
 
