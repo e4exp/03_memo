@@ -57,6 +57,7 @@ public:
 	char* coll_name = "notes";
 	char* conn_file_name = "connection.txt";
 
+
 	//ssl
 	mongocxx::options::client client_options;
 	mongocxx::options::ssl ssl_options;
@@ -76,7 +77,7 @@ public:
 
 	bool save_title = false;
 	bool save_body = false;
-
+	bool is_remote = true;
 
 	enum fields {
 		_id,

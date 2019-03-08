@@ -3,6 +3,9 @@
 #include <ctime>
 #include "time.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
 std::string cstr_to_str(CString cstr) {
 	std::string str = static_cast<std::string>(cstr);
@@ -28,3 +31,22 @@ CString utc_to_local(CString value) {
 	std::string str(result);
 	return str.c_str();
 }
+
+
+std::string get_string_from_file(char* file_name) {
+
+	//get connection string from file
+	std::ifstream fin(file_name);
+	if (!fin) {
+		AfxMessageBox("file cant be read");
+		return "";
+	}
+	std::stringstream strstream;
+	strstream << fin.rdbuf();
+	fin.close();
+	//content -> string
+	std::string str(strstream.str());
+
+	return str;
+}
+
