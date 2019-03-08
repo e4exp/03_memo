@@ -54,7 +54,8 @@ public:
 	MongoSaver sv;
 
 	CListCtrl m_list_picker;
-	
+	int get_text_length_in_ctrl(int);
+
 	afx_msg void OnNMClickListPicker(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnEnChangeEditBody();
 	afx_msg void OnEnChangeEditTitle();

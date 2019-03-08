@@ -410,6 +410,15 @@ void CmemoDlg::delete_note() {
 
 }
 
+int CmemoDlg::get_text_length_in_ctrl(int ctrl) {
+
+	CString str_body;
+	((CEdit*)GetDlgItem(ctrl))->GetWindowTextA(str_body);
+	int len = str_body.GetLength();
+
+	return len;
+}
+
 void CmemoDlg::OnEnChangeEditBody()
 {
 	// TODO: これが RICHEDIT コントロールの場合、このコントロールが
@@ -418,11 +427,23 @@ void CmemoDlg::OnEnChangeEditBody()
 	// OR 状態の ENM_CHANGE フラグをマスクに入れて呼び出す必要があります。
 
 	// TODO: ここにコントロール通知ハンドラー コードを追加してください。
+	/*
+	int body_count = get_text_length_in_ctrl(IDC_EDIT_BODY);
+	if (abs(body_count-sv.picker.old_body_count) > sv.picker.BODY_LOAD_LIMIT) {
+		update_body();
+	}
 
+	sv.picker.old_body_count = body_count;
+	*/
+	if (sv.picker.update_body_count > sv.picker.UPDATE_BODY_LIMIT) {
+		update_body();
+		sv.picker.update_body_count = 0;
+	}
+	else {
+		sv.picker.update_body_count++;
+	}
 	
-	update_body();
-
-
+	
 }
 
 
@@ -435,7 +456,14 @@ void CmemoDlg::OnEnChangeEditTitle()
 
 	// TODO: ここにコントロール通知ハンドラー コードを追加してください。
 
-	update_title();
+	//date_title();
+	if (sv.picker.update_title_count > sv.picker.UPDATE_TITLE_LIMIT) {
+		update_title();
+		sv.picker.update_title_count = 0;
+	}
+	else {
+		sv.picker.update_title_count++;
+	}
 
 
 }
@@ -460,6 +488,7 @@ void CmemoDlg::OnEnSetfocusEditBody()
 void CmemoDlg::OnEnKillfocusEditTitle()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	update_title();
 	sv.save_title = false;
 }
 
@@ -467,6 +496,7 @@ void CmemoDlg::OnEnKillfocusEditTitle()
 void CmemoDlg::OnEnKillfocusEditBody()
 {
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
+	update_body();
 	sv.save_body = false;
 }
 

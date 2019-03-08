@@ -19,6 +19,11 @@ public:
 	CString old_body = "";
 	*/
 
+	const int UPDATE_TITLE_LIMIT = 10;
+	const int UPDATE_BODY_LIMIT = 10;
+	int update_title_count=0;
+	int update_body_count=0;
+
 
 };
 
